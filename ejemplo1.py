@@ -419,6 +419,11 @@ gpio.cleanup()
 #    if b.is_pressed():
 #        print("presionado boton:",time.time())
 
+
+#while True: # Run forever
+#    if gpio.input(10) == GPIO.HIGH:
+#        print("Button was pushed!")
+
 #definir evento si pulsa pin 10
 def button_callback(channel):
     print("Button was pushed!")

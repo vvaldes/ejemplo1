@@ -4,6 +4,8 @@
 
 import copy
 
+import button as button
+
 for i in range(1, 5):
     print(i)
 
@@ -219,6 +221,7 @@ while True:
 # entrar con navegador con ip local o 127.0.0.1
 # ctrl+c para salir
 # en python3 : sudo pip3 install bottle
+#ejecutar como root
 from bottle import route, run, template
 from datetime import datetime
 
@@ -326,6 +329,12 @@ for x in range(1, 4):
         time.sleep(0.02)
 
     print("Ciclo completo")
+
+##libero pines
+gpio.cleanup()
+rojo.stop()
+
+
 # en otro momento se utilizara para manejar un servo que es donde mejor se ve las senales moduladas
 
 # rapberry no tiene entradas analogicas, con lo cual podemos conectar un arduino a la entrada usb, aunque tambien hay entradas ADC.
@@ -367,6 +376,65 @@ try:
 except SerialException:
     print("Puerto en uso, no se puede abrir puerto:", portName)
 
+
+
+#instalar libreria squid
+# git clone https://github.com/simonmonk/squid.git
+# sudo python3 setup.py install
+from squid import *
+import time
+
+##libero pines
+gpio.cleanup()
+
+try:
+    rgb = Squid(18, 23, 24)
+    print("pin rojo")
+    rgb.set_color(RED)
+    time.sleep(2)
+    print("pin azul")
+    rgb.set_color(BLUE)
+    time.sleep(2)
+    print("pin verde")
+    rgb.set_color(GREEN)
+    time.sleep(2)
+    print("pin blanco")
+    rgb.set_color(WHITE)
+    time.sleep(2)
+    print("pin blanco intensidad 300")
+    rgb.set_color(WHITE,300)
+    time.sleep(2)
+except KeyboardInterrupt:
+    print("gpio abierto ya")
+
+gpio.cleanup()
+
+#si queremos activar algo con un botin
+#sudo pip3 install button
+#from button import *
+
+#b=button(7)
+
+#while True:
+#    if b.is_pressed():
+#        print("presionado boton:",time.time())
+
+
+#while True: # Run forever
+#    if gpio.input(10) == GPIO.HIGH:
+#        print("Button was pushed!")
+
+#definir evento si pulsa pin 10
+def button_callback(channel):
+    print("Button was pushed!")
+
+gpio.setwarnings(False) # Ignore warning for now
+gpio.setmode(GPIO.BOARD) # Use physical pin numbering
+gpio.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Set pin 10 to be an input pin and set initial value to be pulled low (off)
+gpio.add_event_detect(10,GPIO.RISING,callback=button_callback) # Setup event on pin 10 rising edge
+
+message = input("Press enter to quit\n\n") # Run until someone presses enter
+gpio.cleanup() # Clean up
 
 
 

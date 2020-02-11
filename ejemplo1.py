@@ -4,7 +4,7 @@
 
 import copy
 
-import button as button
+#import button as button
 
 for i in range(1, 5):
     print(i)
@@ -78,6 +78,12 @@ f = open("test.txt", "r")
 s = f.read()
 print(s)
 
+#abre automaticamente y se libera automaticamente
+with open("test.txt") as fLectura:
+    for linea in fLectura:
+        print(linea)
+
+
 # lista ficheros
 # FUNCIONA CON PYTHON3.7  /usr/bin/python3
 from os import listdir
@@ -118,28 +124,45 @@ directorio = "/home/pi/Desktop/libros/"
 fichero = directorio + "Annual2018.pdf"
 print("Directorio:", directorio)
 a = input("Toca Intro")
-files = ls1(directorio)
-for file in files:
-    print(file)
+try:
+    files = ls1(directorio)
+    for file in files:
+        print(file)
+except OSError as e:
+    print(e.errno)
+    print("Error directorio:",directorio, " Fichero:",fichero)
+
+print("Ficheros en el directorio", directorio)
+a = input("Toca Intro")
+try:
+    files = ls2(directorio)
+    for file in files:
+        print(file)
+except OSError as e:
+    print(e.errno)
+    print("Error directorio:",directorio)
 
 print("Ficheros en el directorio", directorio, )
 a = input("Toca Intro")
-files = ls2(directorio)
-for file in files:
-    print(file)
+try:
+    files = ls3(directorio)
+    for file in files:
+        print(file)
+except OSError as e:
+    print(e.errno)
+    print("Error directorio:",directorio)
 
 print("Ficheros en el directorio", directorio, )
 a = input("Toca Intro")
-files = ls3(directorio)
-for file in files:
-    print(file)
-
-print("Ficheros en el directorio", directorio, )
-a = input("Toca Intro")
-files = ls4(directorio, "000*.pdf")
-for file in files:
-    print(file)
+ficheros="000*.pdf"
+try:
+    files = ls4(directorio, ficheros)
+    for file in files:
+        print(file)
 # exit(0)
+except OSError as e:
+    print(e.errno)
+    print("Error directorio:",directorio, " Ficheros:",ficheros)
 
 import random as r
 
@@ -232,8 +255,10 @@ def index(name="time"):
     time = "{:%Y-%m-%d %H:%M:%S}".format(dt)
     return template("<b>Pi thinks the date/time is: {{t}}</b>", t=time)
 
-
-run(host="0.0.0.0", port=80)
+try:
+    run(host="0.0.0.0", port=80)
+except PermissionError:
+    print("Error de permiso, ejecutar como administrador")
 
 # entradas en rasberry py
 # https://www.prometec.net/raspberry-puertas-analogicas/
@@ -245,9 +270,9 @@ run(host="0.0.0.0", port=80)
 # detecta entrada
 # sudo i2cdetect -y 1
 
-import serial
+#import serial
 
-print("abriendo puerto serie ctrl+c para salir")
+#print("abriendo puerto serie ctrl+c para salir")
 # ser=serial.Serial("/dev/ttyAMA0",9600)
 # ser.write("cualquier texto")
 
@@ -259,6 +284,7 @@ try:
     import RPi.GPIO as gpio
 except RuntimeError:
     print("Error importando modudo RPi.GPIO,probablemente necesita acceso superusuario")
+
 import time
 
 gpio.setmode(gpio.BCM)

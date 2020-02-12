@@ -152,6 +152,75 @@ db.commit()
 db.close()
 
 
+from decimal import Decimal
+from datetime import datetime, date, timedelta
+
+import mysql.connector
+
+# Connect with the MySQL Server
+#cnx = mysql.connector.connect('192.168.0.7', 'victor','vvgvvg', 'zurbaies')
+
+cnx = mysql.connector.connect(user='victor', password='vvgvvg', database='employees',host='192.168.0.7',port='3306')
+
+#con = pymysql.connect('192.168.0.7', 'victor','vvgvvg', 'zurbaies')
+# Get two buffered cursors
+curA = cnx.cursor(buffered=True)
+curB = cnx.cursor(buffered=True)
+
+#try:
+curA.execute("CREATE TABLE IF NOT EXISTS employees (emp_no INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),hire_date DATE)")
+curA.execute("CREATE TABLE IF NOT EXISTS salaries (emp_no INT(11) , salary INT, from_date DATE, to_date DATE)")
+query = "INSERT INTO employees (name,hire_date) VALUES ('victor',DATE('1000-01-01'))"
+curA.execute(query)
+cnx.commit()
+
+query = "SELECT  emp_no FROM employees as a WHERE a.name='victor' AND a.hire_date=DATE('1000-01-01')"
+curB.execute(query)
+#rows = curB.fetchall()
+#row=rows[0]
+#print("rows:", rows, "row", row, "row0", rows[0])
+query = "INSERT INTO salaries (salary,from_date,to_date) VALUES (1000,DATE('1000-01-01'),DATE('9999-01-01'))"
+curA.execute(query,row[0])
+
+
+query = "INSERT INTO salaries (emp_no,salary,from_date,to_date) VALUES (%i,1000,DATE('1000-01-01'),DATE('9999-01-01'))"
+#curA.execute(query,row[0])
+cnx.commit()
+#except mysql.Error as err:
+#    print("tabla ya creada", err)
+
+# Query to get employees who joined in a period defined by two dates
+query = (
+  "SELECT s.emp_no, salary, from_date, to_date FROM employees AS e "
+  "LEFT JOIN salaries AS s USING (emp_no) "
+  "WHERE to_date = DATE('9999-01-01')"
+  "AND e.hire_date BETWEEN DATE(%s) AND DATE(%s)")
+
+# UPDATE and INSERT statements for the old and new salary
+update_old_salary = (
+  "UPDATE salaries SET to_date = %s "
+  "WHERE emp_no = %s AND from_date = %s")
+insert_new_salary = (
+  "INSERT INTO salaries (emp_no, from_date, to_date, salary) "
+  "VALUES (%s, %s, %s, %s)")
+
+# Select the employees getting a raise
+curA.execute(query, (date(2000, 1, 1), date(2000, 12, 31)))
+
+# Iterate through the result of curA
+for (emp_no, salary, from_date, to_date) in curA:
+
+  # Update the old and insert the new salary
+  new_salary = int(round(salary * Decimal('1.15')))
+  curB.execute(update_old_salary, (tomorrow, emp_no, from_date))
+  curB.execute(insert_new_salary,
+               (emp_no, tomorrow, date(9999, 1, 1,), new_salary))
+
+  # Commit the changes
+  cnx.commit()
+
+cnx.close()
+
 #import peewee as pw
 from peewee import *
 
